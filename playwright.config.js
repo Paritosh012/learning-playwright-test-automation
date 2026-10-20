@@ -8,7 +8,7 @@ module.exports = defineConfig({
   timeout: 30000,
   expect: { timeout: 5000 },
 
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [["list"], ["html", { open: "never" }], ["./my-reporter.js"]],
 
   use: {
     baseURL: "https://the-internet.herokuapp.com",

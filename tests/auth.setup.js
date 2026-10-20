@@ -14,4 +14,5 @@ test("Login", async ({ page }) => {
   );
 
   await page.context().storageState({ path: AUTH_FILE });
+  console.log("SETUP: Login info saved");
 });

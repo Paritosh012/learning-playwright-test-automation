@@ -1,0 +1,18 @@
+===== MERI TEST REPORT =====
+Login → passed (6702ms)
+DELETE - post hatao → passed (2068ms)
+POST - naya post banao → passed (3456ms)
+get started link → passed (3145ms)
+Google homepage → passed (3519ms)
+has title → passed (4163ms)
+GET - post lao → passed (6239ms)
+Secure page ka heading → passed (5429ms)
+Login page assertion → passed (11632ms)
+Logout button dikh raha hai → passed (11214ms)
+Soft Assertions → failed (25787ms)
+Cleanup → passed (9ms)
+----------------------------
+Passed: 11
+Failed: 1
+Skipped: 0
+Final: failed
