@@ -2,10 +2,8 @@ const fs = require("fs");
 
 class MyReporter {
   constructor() {
-    this.passed = 0;
-    this.failed = 0;
-    this.skipped = 0;
-    this.lines = [];
+    // test.id -> { test, result }  (sirf AAKHRI attempt yaad rakhte hain)
+    this.results = new Map();
   }
 
   onBegin(config, suite) {
@@ -13,21 +11,35 @@ class MyReporter {
   }
 
   onTestEnd(test, result) {
-    if (result.status === "passed") this.passed++;
-    else if (result.status === "skipped") this.skipped++;
-    else this.failed++;
-
-    this.lines.push(test.title + " → " + result.status + " (" + result.duration + "ms)");
+    // Retries hone par ye har attempt ke liye chalta hai.
+    // Map same test.id ko overwrite karta hai, to ek test ek hi baar gina jayega.
+    this.results.set(test.id, { test, result });
   }
 
   onEnd(result) {
+    const count = { expected: 0, unexpected: 0, flaky: 0, skipped: 0 };
+    const lines = [];
+
+    for (const { test, result: last } of this.results.values()) {
+      // outcome() saare attempts dekh kar final faisla deta hai:
+      // expected = pass, unexpected = fail, flaky = pehle fail phir retry mein pass
+      const outcome = test.outcome();
+      count[outcome]++;
+
+      // titlePath mein project (browser) ka naam bhi aata hai,
+      // to chromium/firefox/webkit wale same test alag dikhenge
+      const name = test.titlePath().filter(Boolean).join(" › ");
+      lines.push(name + " → " + outcome + " (" + last.duration + "ms, attempt " + (last.retry + 1) + ")");
+    }
+
     const summary =
       "===== MERI TEST REPORT =====\n" +
-      this.lines.join("\n") +
+      lines.join("\n") +
       "\n----------------------------\n" +
-      "Passed: " + this.passed + "\n" +
-      "Failed: " + this.failed + "\n" +
-      "Skipped: " + this.skipped + "\n" +
+      "Passed: " + count.expected + "\n" +
+      "Failed: " + count.unexpected + "\n" +
+      "Flaky: " + count.flaky + "\n" +
+      "Skipped: " + count.skipped + "\n" +
       "Final: " + result.status + "\n";
 
     fs.writeFileSync("my-report.txt", summary);

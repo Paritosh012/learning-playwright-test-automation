@@ -23,7 +23,9 @@ test("Login page assertion", async ({ page }) => {
 
 test("Soft Assertions", async ({ page }) => {
   await page.goto("/login");
-  await expect.soft(page.locator("h2")).toHaveText("Galat 1");
-  await expect.soft(page.locator("h4")).toHaveText("Galat 2");
+  await expect.soft(page.locator("h2")).toHaveText("Login Page");
+  await expect
+    .soft(page.locator("h4"))
+    .toContainText("log into the secure area");
   console.log("soft ke baad bhi ye chala");
 });

@@ -6,7 +6,7 @@ test("Login", async ({ page }) => {
   await page.getByLabel("Password").fill("SuperSecretPassword!");
   await page.getByRole("button", { name: "Login" }).click();
 
-  await expect(page).toHaveURL("/secure/");
+  await expect(page).toHaveURL("/secure");
   await expect(page.locator("#flash")).toContainText(
     "You logged into a secure area!",
   );

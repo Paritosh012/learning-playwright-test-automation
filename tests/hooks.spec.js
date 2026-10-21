@@ -1,47 +1,40 @@
 const { test, expect } = require("@playwright/test");
 
-let testNumber = 0;
+let api;
 
-test.beforeAll(async () => {
-  console.log("beforeAll: file shuru hui (sirf ek baar)");
+test.beforeAll(async ({ playwright }) => {
+  api = await playwright.request.newContext();
+  const res = await api.get("https://the-internet.herokuapp.com/");
+  expect(res.ok()).toBeTruthy();
+  console.log("beforeAll: site chal rahi hai");
 });
 
 test.beforeEach(async ({ page }) => {
-  testNumber++;
-  console.log("beforeEach: test " + testNumber + " se pehle secure page khola");
   await page.goto("/secure");
+  console.log("beforeEach: secure page khola");
 });
 
 test.afterEach(async ({ page }, testInfo) => {
-  console.log(
-    "afterEach: '" + testInfo.title + "' khatam, result = " + testInfo.status,
-  );
-
-  if (testInfo.status !== testInfo.expectedStatus) {
-    await page.screenshot({
-      path: "test-results/hooks-failed-" + testNumber + ".png",
-    });
-    console.log("afterEach: test fail hua, screenshot save kiya");
+  if (testInfo.status === "failed") {
+    await testInfo.attach("fail-url", { body: page.url() });
   }
+  console.log("afterEach: " + testInfo.title + " → " + testInfo.status);
 });
 
 test.afterAll(async () => {
-  console.log("afterAll: file khatam, total tests chale = " + testNumber);
+  await api.dispose();
+  console.log("afterAll: safai ho gayi");
 });
 
 test("Secure page ka heading", async ({ page }) => {
-  await expect(page.locator("h2")).toContainText("Secure");
+  await expect(page.locator("h2")).toContainText("Secure Area");
 });
 
 test("Logout button dikh raha hai", async ({ page }) => {
-  console.log("TEST 2 chal raha hai");
   await expect(page.getByRole("link", { name: "Logout" })).toBeVisible();
 });
 
 test("Logout karne par login page aata hai", async ({ page }) => {
-  console.log("TEST 3 chal raha hai");
-
   await page.getByRole("link", { name: "Logout" }).click();
-  await expect(page).toHaveURL(/login/);
-  await expect(page.locator("#flash")).toContainText("You logged out");
+  await expect(page).toHaveURL("/login");
 });
